@@ -1950,7 +1950,7 @@ object MyApp
 				m.from_algeb(algeb)
 				val san=Commands.g.b.toSan(m)
 				cg.makeMove(m)
-				AddMoveToGuiBook(if(i==0) "!" else "!?",false,num,!madesans.contains(san),"solution")
+				AddMoveToGuiBook(if(cgb.getturn==piece.BLACK) "!" else "!?",false,num,!madesans.contains(san),"solution")
 				i+=1
 			}
 		}
@@ -2577,10 +2577,7 @@ object MyApp
 
 		if(butils.IsInteresting(eval)) Commands.AnnotateMove(san,"?!",uci,dosave=false)
 		if(butils.IsPromising(eval)) Commands.AnnotateMove(san,"!?",uci,dosave=false)
-	}
-
-	val PLUS_INFINITE= 100000
-	val MINUS_INFINITE= -PLUS_INFINITE
+	}	
 
 	def minimax_recursive(depth:Int,maxdepth:Int,line:List[String]):Int=
 	{
@@ -2613,7 +2610,7 @@ object MyApp
 			mtimer=new Timer()
 		}})
 
-		var alpha= MINUS_INFINITE
+		var alpha= butils.MINUS_INFINITE
 
 		if(depth>maxdepth) return alpha
 
@@ -2631,21 +2628,31 @@ object MyApp
 			// count every move made on the board as a node ( rather than every recursive call )
 			nodes+=1
 
-			if(!minimaxrunning) return MINUS_INFINITE
+			if(!minimaxrunning) return butils.MINUS_INFINITE
 
-			val value=Commands.GetBookMoveEval(san)
+			var value=Commands.GetBookMoveEval(san)
+
+			var solution=false
+
+			if(value==butils.PLUS_INFINITE)
+			{
+				if(Commands.g.b.getturn==piece.WHITE) value= 10000 else value= -10000
+				solution=true
+			}
 
 			Commands.g.makeSanMove(san)
 
 			val nodes0=nodes
 
-			var eval= -minimax_recursive(depth+1,maxdepth,line:+san)			
+			var eval= value
+
+			if(!solution) eval = -minimax_recursive(depth+1,maxdepth,line:+san)			
 
 			val nodes1=nodes
 
 			val count=nodes1-nodes0
 
-			if(eval==PLUS_INFINITE)
+			if(eval==butils.PLUS_INFINITE)
 			{
 				eval=value
 			}			
@@ -2658,11 +2665,11 @@ object MyApp
 
 			if(minimaxstudymode) Commands.g.back else Commands.g.delete
 
-			Commands.SetBookMoveEval(san,eval,dosave=false)
+			if(!solution) Commands.SetBookMoveEval(san,eval,dosave=false)
 
-			Commands.SetBookMovePlays(san,if(recordnodes) count else 1,dosave=false)
+			if(!solution) Commands.SetBookMovePlays(san,if(recordnodes) count else 1,dosave=false)
 
-			if(colormoves)
+			if((colormoves)&&(!solution))
 			{
 				ColorMove(san,eval)
 			}
@@ -2800,6 +2807,8 @@ object MyApp
 					val i=parts(1).toInt
 
 					Commands.SetBookMovePriority(san,i)
+
+					CloseStage("{setprioritydialog}")
 
 					Update
 				}

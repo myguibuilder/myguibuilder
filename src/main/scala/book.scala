@@ -15,6 +15,9 @@ import Encode32._
 
 object butils
 {	
+	val PLUS_INFINITE= 100000
+	val MINUS_INFINITE= -PLUS_INFINITE
+
 	val pborders=Map[Int,String](
 		0  -> "",
 		1  -> "border-style: solid; border-width: 1px; border-color: #00af00;",
@@ -51,6 +54,8 @@ object butils
 
 	def IsEval(what:String):Boolean=
 	{
+		if(what=="solution") return true
+
 		var isint=true
 
 		try{
@@ -70,6 +75,8 @@ object butils
 
 	def Eval(what:String):Int=
 	{
+		if(what=="solution") return PLUS_INFINITE
+
 		if(IsEval(what))
 		{
 			if(DataUtils.StartsWith(what,'E')) return what.substring(2,what.length).toInt
