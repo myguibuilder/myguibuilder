@@ -1547,6 +1547,10 @@ object MyApp
 		{
 			Commands.DecBookMovePriority(key)
 		}
+		else if(action=="setpriority")
+		{
+			SetPriority(key)
+		}
 		else if(action=="incpriority")
 		{
 			Commands.IncBookMovePriority(key)
@@ -2766,6 +2770,44 @@ object MyApp
 		GetMyText("{filterfilename}").SetText(defaultfilterfilename)
 		GetMyText("{filterplayerwhite}").SetText(defaultfilterplayerwhite)
 		GetMyText("{filterplayerblack}").SetText(defaultfilterplayerblack)
+	}
+
+	def SetPriority(san:String)
+	{
+		val buttons=(for(i <- butils.pborders.keys.toList.sorted.reverse) yield
+		{
+			val style=butils.pborders(i).replaceAll("border","-fx-border")
+			s"""
+				|<button id="{setpriority $i}" width="300.0" style="$style" text="$i"/>
+			""".stripMargin
+		}).mkString("\n")
+
+		val blob=s"""
+					|<vbox padding="5" gap="5">					
+					|$buttons
+					|</vbox>
+				""".stripMargin
+
+		def setpriority_handler(ev:MyEvent)
+		{
+			if(ev.kind=="button pressed")
+			{
+				val trueid=ev.Id.replaceAll("[\\{\\}]","")
+				val parts=trueid.split(" ").toList
+
+				if(parts(0)=="setpriority")
+				{
+					val i=parts(1).toInt
+
+					Commands.SetBookMovePriority(san,i)
+
+					Update
+				}
+			}
+		}		
+
+		MyStage("{setprioritydialog}","Set priority",blob,
+			modal=true,usewidth=false,useheight=false,handler=setpriority_handler)		
 	}
 
 	def FilterSearch

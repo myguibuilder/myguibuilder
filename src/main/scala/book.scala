@@ -14,7 +14,20 @@ import org.apache.commons.io.FileUtils._
 import Encode32._
 
 object butils
-{
+{	
+	val pborders=Map[Int,String](
+		0  -> "",
+		1  -> "border-style: solid; border-width: 1px; border-color: #00af00;",
+		2  -> "border-style: solid; border-width: 2px; border-color: #00af00;",
+		3  -> "border-style: solid; border-width: 3px; border-color: #00af00;",
+		4  -> "border-style: solid; border-width: 4px; border-color: #00ff00;",
+		5  -> "border-style: solid; border-width: 5px; border-color: #00ff00;",
+		6  -> "border-style: solid; border-width: 6px; border-color: #00af00;",
+		7  -> "border-style: solid; border-width: 7px; border-color: #00af00;",
+		8  -> "border-style: solid; border-width: 8px; border-color: #00af00;",
+		9  -> "border-style: solid; border-width: 9px; border-color: #00ff00;",
+		10 -> "border-style: solid; border-width: 10px; border-color: #00ff00;"
+	)
 
 	var interrupted=false
 
@@ -234,6 +247,14 @@ case class bookPosition()
 			val currentpriority=entries(san).priority
 			val newpriority=if(currentpriority<10) currentpriority+1 else 10
 			entries(san).priority=newpriority			
+		}
+	}
+
+	def setPriority(san:String,priority:Int)
+	{
+		if(entries.contains(san))
+		{
+			entries(san).priority=priority			
 		}
 	}
 
@@ -506,23 +527,9 @@ case class bookPosition()
 					|</span>
 					|</td>
 				""".stripMargin
-			}).mkString("\n")
+			}).mkString("\n")			
 
-			val pborders=Map[Int,String](
-				0  -> "",
-				1  -> "border-style: solid; border-width: 1px; border-color: #00af00;",
-				2  -> "border-style: solid; border-width: 2px; border-color: #00af00;",
-				3  -> "border-style: solid; border-width: 3px; border-color: #00af00;",
-				4  -> "border-style: solid; border-width: 4px; border-color: #00ff00;",
-				5  -> "border-style: solid; border-width: 5px; border-color: #00ff00;",
-				6  -> "border-style: solid; border-width: 6px; border-color: #00af00;",
-				7  -> "border-style: solid; border-width: 7px; border-color: #00af00;",
-				8  -> "border-style: solid; border-width: 8px; border-color: #00af00;",
-				9  -> "border-style: solid; border-width: 9px; border-color: #00ff00;",
-				10 -> "border-style: solid; border-width: 10px; border-color: #00ff00;"
-			)
-
-			var border=pborders(priority)
+			var border=butils.pborders(priority)
 
 			val uri=new File("web/forwardt.png").toURI()
 
@@ -542,19 +549,24 @@ case class bookPosition()
 				|</td>
 				|$td<font color="$col" size="5"><b>$annot</b></font></td>
 				|
-				|<td align="center" onmousedown="setclick('$k','incpriority','','$uci');"><font size="4">
+				|<td align="center" onmousedown="setclick('$k','incpriority','','$uci');">
 				|<a name="dummy2"></a>
 				|<a href="#dummy2" style="text-decoration: none;">
-				|<font color="#7fff7f" size="3">up</font></td>
+				|<font color="#7fff7f" size="3">up</font>
 				|</a>
 				|</td>
 				|
-				|$td<font color="#7f7fff" size="4">$priority</font></td>
+				|<td align="center" onmousedown="setclick('$k','setpriority','','$uci');">
+				|<a name="dummy2"></a>
+				|<a href="#dummy2" style="text-decoration: none;">
+				|<font color="#7f7fff" size="4">$priority</font>
+				|</a>
+				|</td>
 				|
-				|<td align="center" onmousedown="setclick('$k','decpriority','','$uci');"><font size="4">
+				|<td align="center" onmousedown="setclick('$k','decpriority','','$uci');">
 				|<a name="dummy3"></a>
 				|<a href="#dummy3" style="text-decoration: none;">
-				|<font color="ff7f7f" size="3">dn</font></td>
+				|<font color="ff7f7f" size="3">dn</font>
 				|</a>
 				|</td>
 				|

@@ -315,6 +315,12 @@ object Commands extends Module
 		if(dosave) SaveGamePos
 	}
 
+	def SetBookMovePriority(san:String,priority:Int,dosave:Boolean=true)
+	{
+		g.book.currentPos.setPriority(san,priority)
+		if(dosave) SaveGamePos
+	}
+
 	def IncBookMovePriority(san:String,dosave:Boolean=true)
 	{
 		g.book.currentPos.incPriority(san)
