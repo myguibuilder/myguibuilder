@@ -2725,6 +2725,7 @@ object MyApp
 
 		val blob=s"""
 					|<vbox>					
+					|
 					|<hbox gap="5" padding="5">
 					|<label text="File name"/>
 					|<textfield id="{filterfilename}"/>
@@ -2734,17 +2735,31 @@ object MyApp
 					|<textfield id="{filterplayerblack}"/>
 					|<button id="{filtersearch}" width="200.0" text="Search"/>
 					|</hbox>
+					|
 					|<hbox gap="5" padding="5">
 					|<label text="Rating"/>
 					|<slider id="{filterrating}" value="2000.0" width="800.0" height="50.0" min="1000.0" max="3000.0" majortickunit="100.0" minortickcount="0" showticklabels="true" showtickmarks="true"/>
 					|</hbox>
+					|
 					|<hbox gap="5" padding="5">
 					|<label text="Max games"/>
 					|<slider id="{filtermaxgames}" value="100.0" width="800.0" height="50.0" min="0.0" max="2000.0" majortickunit="100.0" minortickcount="0" showticklabels="true" showtickmarks="true"/>
 					|</hbox>
+					|
+					|<hbox gap="5" padding="5">
+					|<label text="Min plies"/>
+					|<slider id="{filterminplies}" value="5.0" width="800.0" height="50.0" min="0.0" max="50.0" majortickunit="5.0" minortickcount="4" showticklabels="true" showtickmarks="true"/>
+					|</hbox>
+					|					|
+					|<hbox gap="5" padding="5">
+					|<label text="Min time"/>
+					|<slider id="{filtermintime}" value="60.0" width="800.0" height="50.0" min="0.0" max="600.0" majortickunit="60.0" minortickcount="3" showticklabels="true" showtickmarks="true"/>
+					|</hbox>
+					|
 					|<hbox gap="5" padding="5">					
 					|$variants
 					|</hbox>
+					|
 					|</vbox>
 				""".stripMargin
 
@@ -2844,6 +2859,8 @@ object MyApp
 		Set("{settings}#{defaultfilterplayerblack}",filterplayerblack)
 		val filterrating=GD("{components}#{filterrating}",2000.0).toInt
 		val filtermaxgames=GD("{components}#{filtermaxgames}",100.0).toInt
+		val filterminplies=GD("{components}#{filterminplies}",5.0).toInt
+		val filtermintime=GD("{components}#{filtermintime}",60.0).toInt
 
 		val variants:Map[String,Boolean] = (for(v <- Settings.SUPPORTED_VARIANTS) yield
 		{
@@ -2884,12 +2901,24 @@ object MyApp
 				whiterating=dummy.get_header("WhiteElo").toInt
 				blackrating=dummy.get_header("BlackElo").toInt
 			}catch{case e:Throwable=>{}}
+			var plycount=0
+			try{
+				plycount=dummy.get_header("PlyCount").toInt
+			}catch{case e:Throwable=>{}}
+			val plycountok=plycount>=filterminplies
+			var time=60
+			try{
+				val timeh=dummy.get_header("TimeControl")
+				val parts=timeh.split("\\+")
+				time=parts(0).toInt
+			}catch{case e:Throwable=>{}}
+			val timeok=time>=filtermintime
 			val rating=(whiterating+blackrating)/2.toInt
 			val ratingok=rating>=filterrating
 			val variant=dummy.get_header("Variant")
 			val variantok=if(variants.contains(variant)) variants(variant) else false			
 
-			if(playerwhiteok&&playerblackok&&ratingok&&variantok)
+			if(playerwhiteok&&playerblackok&&ratingok&&variantok&&plycountok&&timeok)
 			{
 				count+=1
 				collection+=pgn
