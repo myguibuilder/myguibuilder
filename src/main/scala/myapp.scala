@@ -2210,11 +2210,13 @@ object MyApp
 			return
 		}
 
-		val deep=if(usedepthbonus) "<b>deep</b> <small>#"+deepgo+"</small> " else ""
+		val deep=if(usedepthbonus) "<b>deep</b>&nbsp;<small>#"+deepgo+"</small>&nbsp;" else "shallow&nbsp;"
 
 		Platform.runLater(new Runnable{def run{							
 			val blob=s"""
-				|<font size=5>Analyzing move $deep<font color=blue><b>$san</b></font> <small>[ $evalindex / $numeval<small> ]</small> ( pos eval $bestscore )
+				|<font size=5>Analyzing move &nbsp;$deep
+				|<font color=blue><b>$san</b></font>&nbsp;
+				|<small>[ $evalindex / $numeval<small> ]</small>
 				|<hr>
 				|$book_content
 			""".stripMargin
@@ -2435,7 +2437,14 @@ object MyApp
 
 					EvalAllFunc()
 
-					if(reevalgood) EvalAllIterativeFunc
+					var posnormal=true
+
+					try{
+						if(bestscore.toInt > (2*reevallimit)) posnormal=false
+						if(bestscore.toInt < (-2*reevallimit)) posnormal=false
+					}catch{case e:Throwable=>{}}
+
+					if(reevalgood && posnormal) EvalAllIterativeFunc
 
 					stopevalmoves=false
 
