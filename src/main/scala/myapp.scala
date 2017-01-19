@@ -2404,7 +2404,7 @@ object MyApp
 
 	def EvalAllMoves(singlesan:String=null)
 	{
-		DelAllMoves
+		if(singlesan==null) DelAllMoves
 
 		def eval_handler(ev:MyEvent)
 		{
@@ -2480,7 +2480,7 @@ object MyApp
 						if(bestscore.toInt < (-2*reevallimit)) posnormal=false
 					}catch{case e:Throwable=>{}}
 
-					if(reevalgood && posnormal && ( !(stopatmate && matefound) ) && (singlesan!=null) ) EvalAllIterativeFunc
+					if(reevalgood && posnormal && ( !(stopatmate && matefound) ) && (singlesan==null) ) EvalAllIterativeFunc
 
 					stopevalmoves=false
 
