@@ -421,6 +421,7 @@ object MyApp
 			|</hbox>
 			|<hbox id="boardcontrolpanelhbox" bimage="control.jpg" cover="false" gap="5" padding="5">						
 			|	<button id="{evalallmoves}" text="Eval all"/>
+			|	<button id="{evalsinglemove}" img="icons/build.png"/>
 			|	<combobox id="{evalalldepth}"/>
 			|	<button id="{boardcontrolpanelback}" img="icons/backt.png" style="round"/>
 			|	<button id="{boardcontrolpanelforward}" img="icons/forwardt.png" style="round"/>			
@@ -639,7 +640,12 @@ object MyApp
 
 			if(ev.Id=="{evalallmoves}")
 			{
-				EvalAllMoves
+				EvalAllMoves()
+			}
+
+			if(ev.Id=="{evalsinglemove}")
+			{
+				EvalSingleMove
 			}
 
 			if(ev.Id=="{addexclammovetobookfwcont}")
@@ -1033,6 +1039,10 @@ object MyApp
 					|<hbox gap="5" padding="5">
 					|<label text="Reevaluate important moves"/>
 					|<checkbox id="{reevalgood}"/>
+					|</hbox>
+					|<hbox gap="5" padding="5">
+					|<label text="Stop at first mate"/>
+					|<checkbox id="{stopatmate}"/>
 					|</hbox>
 					|<hbox gap="5" padding="5">
 					|<label text="Eval limit"/>
@@ -2166,6 +2176,8 @@ object MyApp
 
 	var reevalgood=false
 
+	var stopatmate=false
+
 	var reevallimit=300
 
 	var numberlimit=3
@@ -2179,6 +2191,8 @@ object MyApp
 	var numeval=0
 
 	var bestscore="?"
+
+	var matefound=false
 
 	def EvalMove(san:String,usedepthbonus:Boolean=false)
 	{
@@ -2281,6 +2295,8 @@ object MyApp
 		Commands.SaveGamePos
 
 		if(usedepthbonus) deepsans=deepsans:+san
+
+		if(score > 9000) matefound=true
 	}
 
 	var deepsans=List[String]()
@@ -2306,13 +2322,15 @@ object MyApp
 				EvalAllFunc(true)
 
 				deepgo+=1
+
+				if(stopatmate && matefound) ready=true
 			}
 		}
 	}
 
 	var sanssortedfiltered=scala.collection.immutable.ListMap[String,Int]()
 
-	def InitEvalAll(filter:Boolean=false)
+	def InitEvalAll(filter:Boolean=false,singlesan:String=null)
 	{
 		var b=new board
 
@@ -2322,6 +2340,8 @@ object MyApp
 
 		bestscore="?"
 
+		matefound=false
+
 		var evals=Map[String,Int]()		
 
 		while(b.nextLegalMove())
@@ -2330,7 +2350,8 @@ object MyApp
 
 			val eval=Commands.GetBookMoveEval(san)
 
-			evals+=(san->eval)
+			if(singlesan==null) evals+=(san->eval)
+			else if(san==singlesan) evals+=(san->eval)
 		}
 
 		var sanssortedorig=scala.collection.immutable.ListMap(evals.toSeq.sortWith(_._2 > _._2):_*)
@@ -2360,9 +2381,11 @@ object MyApp
 	{
 		evalindex=0		
 
-		for((san,eval)<-sanssortedfiltered)
+		for( (san,eval) <- sanssortedfiltered )
 		{
 			if(stopevalmoves) return
+
+			if(stopatmate && matefound) return
 
 			evalindex+=1
 
@@ -2370,7 +2393,16 @@ object MyApp
 		}
 	}
 
-	def EvalAllMoves
+	def EvalSingleMove
+	{
+		val cn=Commands.g.current_node
+		if(cn.parent==null) return
+		val san=cn.genSan
+		Commands.g.back
+		EvalAllMoves(singlesan=san)
+	}
+
+	def EvalAllMoves(singlesan:String=null)
 	{
 		DelAllMoves
 
@@ -2425,17 +2457,21 @@ object MyApp
 
 					reevalgood=GB("{components}#{reevalgood}",false)
 
+					stopatmate=GB("{components}#{stopatmate}",false)
+
 					reevallimit=Builder.GD("{components}#{reevallimit}",300.0).toInt
 
 					numberlimit=Builder.GD("{components}#{numberlimit}",3.0).toInt
 
 					maxiterations=Builder.GD("{components}#{maxiterations}",3.0).toInt
 
+					maxiterations=Builder.GD("{components}#{maxiterations}",3.0).toInt					
+
 					colormoveseval=GB("{components}#{colormoveseval}",false)
 
-					InitEvalAll()
+					InitEvalAll(singlesan=singlesan)
 
-					EvalAllFunc()
+					EvalAllFunc(filter=(singlesan!=null))
 
 					var posnormal=true
 
@@ -2444,7 +2480,7 @@ object MyApp
 						if(bestscore.toInt < (-2*reevallimit)) posnormal=false
 					}catch{case e:Throwable=>{}}
 
-					if(reevalgood && posnormal) EvalAllIterativeFunc
+					if(reevalgood && posnormal && ( !(stopatmate && matefound) ) && (singlesan!=null) ) EvalAllIterativeFunc
 
 					stopevalmoves=false
 
@@ -2578,14 +2614,13 @@ object MyApp
 	{
 		val uci=Commands.g.b.sanToMove(san).toAlgeb
 
+		Commands.AnnotateMove(san,"-",uci,dosave=false)
 		if(butils.IsMated(eval)) Commands.AnnotateMove(san,"??",uci,dosave=false)
 		if(butils.IsMate(eval)) Commands.AnnotateMove(san,"!!",uci,dosave=false)
-
 		if(butils.IsBad(eval)) Commands.AnnotateMove(san,"?",uci,dosave=false)
 		if(butils.IsGood(eval)) Commands.AnnotateMove(san,"!",uci,dosave=false)
-
 		if(butils.IsInteresting(eval)) Commands.AnnotateMove(san,"?!",uci,dosave=false)
-		if(butils.IsPromising(eval)) Commands.AnnotateMove(san,"!?",uci,dosave=false)
+		if(butils.IsPromising(eval)) Commands.AnnotateMove(san,"!?",uci,dosave=false)		
 	}	
 
 	def minimax_recursive(depth:Int,maxdepth:Int,line:List[String]):Int=
