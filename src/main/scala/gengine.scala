@@ -1402,7 +1402,7 @@ case class GEngine(
 		if(HasStage(sid))
 		{
 			GetStage(sid).SetWidth(640.0)
-			GetStage(sid).SetHeight(730.0)
+			GetStage(sid).SetHeight(740.0)
 			GetStage(sid).SetY(10.0)
 			return
 		}	
@@ -1574,7 +1574,8 @@ case class GEngine(
 		var maxstr:String="",
 		var defaultstr:String="",
 		var send:Boolean=true,
-		var subkind:String=""
+		var subkind:String="",
+		var vars:List[String]=List[String]()
 	)
 	{
 		def dosend:Boolean=
@@ -1591,14 +1592,20 @@ case class GEngine(
 
 				var sliderid=id+"#{slider}"
 				var textid=id+"#{text}"
+				val comboid=id+"#{selected}"
 
-				var value=GS(Cve(if(kind=="spin") textid else id),defaultstr)
+				var value=if(kind=="combo") GS(Cve(comboid))
+				else GS(Cve(if(kind=="spin") textid else id),defaultstr)
 
 				if((kind=="spin")&&(value!=defaultstr)) value=""+value.toDouble.toInt
 
 				if(reset)
 				{
-					if(kind=="spin")
+					if(kind=="combo")
+					{
+						Set(Cve(comboid),defaultstr)
+					}
+					else if(kind=="spin")
 					{
 						Set(Cve(textid),defaultstr)
 						Set(Cve(sliderid),defaultstr)
@@ -1638,7 +1645,7 @@ case class GEngine(
 			{
 				if(tokenizer.Get!="option") return null
 
-				val reservedtokens=List("name","type","min","max","default")
+				val reservedtokens=List("name","type","min","max","default","var")
 
 				def IsReserved(token:String)=reservedtokens.contains(token)
 
@@ -1667,6 +1674,7 @@ case class GEngine(
 					if(currenttoken=="min") minstr=field
 					if(currenttoken=="max") maxstr=field
 					if(currenttoken=="default") defaultstr=field
+					if(currenttoken=="var") vars=vars:+field
 				}
 			}
 
@@ -1735,6 +1743,27 @@ case class GEngine(
 				""".stripMargin
 				td3=s"""
 				|<textfield id="$id#{text}" qualifier="text" prefixget="variant" prefixset="variant" text="$intvalue" width="100.0" />
+				""".stripMargin
+			}
+			if(kind=="combo")
+			{
+				td1=s"""
+					|<label text="$name"/>
+				""".stripMargin
+				var value=GS(Cve(id),defaultstr)
+				val items=(for(v <- vars) yield ("<s>"+v+"</s>")).mkString("\n")
+				val sel=GS(Cve(id)+"#{selected}",defaultstr)
+				val data=Data.FromXMLString(s"""
+					|<m>
+					|<a key="items">
+					|$items
+					|</a>
+					|<s key="selected">$sel</s>
+					|</m>
+				""".stripMargin)
+				Set(Cve(id),data)
+				td2=s"""
+				|<combobox id="$id" prefixget="variant" prefixset="variant"/>
 				""".stripMargin
 			}
 			if(kind=="separator")
@@ -1972,6 +2001,22 @@ case class GEngine(
 			{
 				val xboardcheckboxbool=if(checkboxbool=="true") "1" else "0"
 				IssueCommand("option "+checkboxname+"="+xboardcheckboxbool)
+			}
+		}
+
+		if(ev.kind=="combobox selected")
+		{
+			val comboboxname=GetNameFromId(ev.Id)
+
+			val value=ev.value
+
+			if(protocol=="UCI")
+			{
+				IssueCommand("setoption name "+comboboxname+" value "+value)
+			}
+			if(protocol=="XBOARD")
+			{
+				IssueCommand("option "+comboboxname+"="+value)
 			}
 		}
 	}

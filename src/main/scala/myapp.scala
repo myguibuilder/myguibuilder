@@ -314,6 +314,71 @@ object MyApp
 			s"""<radiomenuitem id="{rmmultipv$mpv}"$selected togglegroup="rmmultipv" text="$mpv"/>"""
 		}).mkString("\n")
 		val bookbuttonstyle="-fx-padding: 0px 2px 2px 6px; -fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: monospace;"
+
+		val annotbookpanel=s"""
+			|<hbox bimage="wood.jpg" cover="false" padding="5">
+			|<button id="{pastepgnbutton}" img="icons/paste.png"/>
+			|<button id="{addmovetobook}" img="icons/add.png"/>			
+			|<button id="{addexclammovetobookfw}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!f"/>
+			|<button id="{addpromisingmovetobookfw}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?f"/>
+			|<button id="{adddoubleexclammovetobookfw}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!f"/>			
+			|<button id="{addmatedmovetobookfw}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??f"/>
+			|<button id="{addbadmovetobookfw}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?f"/>
+			|<button id="{lookupsolutionbutton}" img="icons/look.png"/>			
+			|<button id="{delandlookupsolutionbutton}" style="-fx-background-color: #ff0000;" img="icons/look.png"/>			
+			|<button id="{addexclammovetobook}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!"/>
+			|<button id="{addpromisingmovetobook}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?"/>
+			|<button id="{adddoubleexclammovetobook}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!"/>
+			|<button id="{addmatedmovetobook}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??"/>
+			|<button id="{addbadmovetobook}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?"/>
+			|<combobox id="{selectbookcombo}"/>
+			|<button id="{createnewbook}" img="icons/add.png"/>
+			|<button id="{deletebook}" img="icons/del.png"/>
+			|<button id="{addcurrentgame}" img="icons/board.png"/>
+			|<button id="{buildpgn}" img="icons/build.png"/>
+			|</hbox>
+		""".stripMargin
+
+		val navbookpanel=s"""
+			|<hbox id="boardcontrolpanelhbox" bimage="control.jpg" cover="false" gap="5" padding="5">						
+			|	<button id="{evalallmoves}" text="E. all"/>
+			|	<button id="{evalsinglemove}" img="icons/build.png"/>
+			|<button id="{randomfen}" img="icons/angrybird.png"/>			
+			|	<combobox id="{evalalldepth}"/>			
+			|	<button id="{boardcontrolpanelback}" img="icons/backt.png" style="round"/>
+			|	<button id="{boardcontrolpanelforward}" img="icons/forwardt.png" style="round"/>			
+			|	<button id="{boardcontrolpaneldel}" img="icons/delt.png" style="round"/>
+			|	<button id="{boardcontrolpanelstart}" img="icons/startt.png" style="round"/>
+			|	<button id="{boardcontrolpanelstop}" img="icons/stopt.png" style="round"/>
+			|	<button id="{boardcontrolpanelmake}" img="icons/maket.png" style="round"/>
+			|<button id="{addexclammovetobookfwcont}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!f"/>
+			|<button id="{addpromisingmovetobookfwcont}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?f"/>
+			|<button id="{adddoubleexclammovetobookfwcont}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!f"/>			
+			|<button id="{addmatedmovetobookfwcont}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??f"/>
+			|<button id="{addbadmovetobookfwcont}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?f"/>
+			|<button id="{addfen}" img="icons/add.png"/>
+			|<button id="{delfen}" img="icons/del.png"/>			
+			|<button id="{delallmoves}" img="icons/caution.png"/>			
+			|</hbox>
+		""".stripMargin
+
+		val navcontrolpanelontop=GB("{components}#{navcontrolpanelontop}",false)
+
+		val bookpanel=if(navcontrolpanelontop)
+		{
+			s"""
+				|$navbookpanel
+				|$annotbookpanel
+			""".stripMargin
+		}
+		else
+		{
+			s"""
+				|$annotbookpanel
+				|$navbookpanel				
+			""".stripMargin
+		}
+
 		val blob=s"""
 			|<vbox>
 			|<menubar>
@@ -399,48 +464,7 @@ object MyApp
 			|<tab caption="Book">
 			|<vbox>
 			|
-			|<hbox id="boardcontrolpanelhbox" bimage="control.jpg" cover="false" gap="5" padding="5">						
-			|	<button id="{evalallmoves}" text="E. all"/>
-			|	<button id="{evalsinglemove}" img="icons/build.png"/>
-			|<button id="{randomfen}" img="icons/angrybird.png"/>			
-			|	<combobox id="{evalalldepth}"/>			
-			|	<button id="{boardcontrolpanelback}" img="icons/backt.png" style="round"/>
-			|	<button id="{boardcontrolpanelforward}" img="icons/forwardt.png" style="round"/>			
-			|	<button id="{boardcontrolpaneldel}" img="icons/delt.png" style="round"/>
-			|	<button id="{boardcontrolpanelstart}" img="icons/startt.png" style="round"/>
-			|	<button id="{boardcontrolpanelstop}" img="icons/stopt.png" style="round"/>
-			|	<button id="{boardcontrolpanelmake}" img="icons/maket.png" style="round"/>
-			|<button id="{addexclammovetobookfwcont}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!f"/>
-			|<button id="{addpromisingmovetobookfwcont}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?f"/>
-			|<button id="{adddoubleexclammovetobookfwcont}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!f"/>			
-			|<button id="{addmatedmovetobookfwcont}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??f"/>
-			|<button id="{addbadmovetobookfwcont}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?f"/>
-			|<button id="{addfen}" img="icons/add.png"/>
-			|<button id="{delfen}" img="icons/del.png"/>			
-			|<button id="{delallmoves}" img="icons/caution.png"/>			
-			|</hbox>
-			|
-			|<hbox bimage="wood.jpg" cover="false" padding="5">
-			|<button id="{pastepgnbutton}" img="icons/paste.png"/>
-			|<button id="{addmovetobook}" img="icons/add.png"/>			
-			|<button id="{addexclammovetobookfw}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!f"/>
-			|<button id="{addpromisingmovetobookfw}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?f"/>
-			|<button id="{adddoubleexclammovetobookfw}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!f"/>			
-			|<button id="{addmatedmovetobookfw}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??f"/>
-			|<button id="{addbadmovetobookfw}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?f"/>
-			|<button id="{lookupsolutionbutton}" img="icons/look.png"/>			
-			|<button id="{delandlookupsolutionbutton}" style="-fx-background-color: #ff0000;" img="icons/look.png"/>			
-			|<button id="{addexclammovetobook}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!"/>
-			|<button id="{addpromisingmovetobook}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?"/>
-			|<button id="{adddoubleexclammovetobook}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!"/>
-			|<button id="{addmatedmovetobook}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??"/>
-			|<button id="{addbadmovetobook}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?"/>
-			|<combobox id="{selectbookcombo}"/>
-			|<button id="{createnewbook}" img="icons/add.png"/>
-			|<button id="{deletebook}" img="icons/del.png"/>
-			|<button id="{addcurrentgame}" img="icons/board.png"/>
-			|<button id="{buildpgn}" img="icons/build.png"/>
-			|</hbox>
+			|$bookpanel
 			|
 			|<webview id="{bookwebview}"/>
 			|</vbox>
@@ -1134,6 +1158,8 @@ object MyApp
 					|<checkbox id="{buildblack}" r="6" c="2"/>					
 					|<label text="To book on open PGN" r="7" c="1"/>
 					|<checkbox id="{navtobookonopenpgn}" r="7" c="2"/>					
+					|<label text="Nav control panel on top" r="8" c="1"/>
+					|<checkbox id="{navcontrolpanelontop}" r="8" c="2"/>					
 					|</gridpane>
 					|</vbox>
 				""".stripMargin
@@ -1164,7 +1190,7 @@ object MyApp
 					|<hbox gap="5" padding="5">
 					|<label text="My handle"/>
 					|<textfield id="{myhandle}" width="250.0" style="-fx-font-size: 18px;"/>
-					|</hbox>
+					|</hbox>					
 					|<hbox gap="5" padding="5">
 					|<button id="{profilesettingsok}" width="300.0" style="-fx-font-size: 18px;" text="Ok"/>
 					|</hbox>

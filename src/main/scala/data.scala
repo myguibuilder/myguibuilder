@@ -358,7 +358,7 @@ case class MapKey(
 		true
 	}
 
-	def AsString:String=s"{$key}"
+	def AsString:String = s"{$key}"
 
 	def CreateClone:PathElement=MapKey(key)
 }
