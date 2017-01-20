@@ -398,6 +398,28 @@ object MyApp
 			|</tab>
 			|<tab caption="Book">
 			|<vbox>
+			|
+			|<hbox id="boardcontrolpanelhbox" bimage="control.jpg" cover="false" gap="5" padding="5">						
+			|	<button id="{evalallmoves}" text="E. all"/>
+			|	<button id="{evalsinglemove}" img="icons/build.png"/>
+			|<button id="{randomfen}" img="icons/angrybird.png"/>			
+			|	<combobox id="{evalalldepth}"/>			
+			|	<button id="{boardcontrolpanelback}" img="icons/backt.png" style="round"/>
+			|	<button id="{boardcontrolpanelforward}" img="icons/forwardt.png" style="round"/>			
+			|	<button id="{boardcontrolpaneldel}" img="icons/delt.png" style="round"/>
+			|	<button id="{boardcontrolpanelstart}" img="icons/startt.png" style="round"/>
+			|	<button id="{boardcontrolpanelstop}" img="icons/stopt.png" style="round"/>
+			|	<button id="{boardcontrolpanelmake}" img="icons/maket.png" style="round"/>
+			|<button id="{addexclammovetobookfwcont}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!f"/>
+			|<button id="{addpromisingmovetobookfwcont}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?f"/>
+			|<button id="{adddoubleexclammovetobookfwcont}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!f"/>			
+			|<button id="{addmatedmovetobookfwcont}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??f"/>
+			|<button id="{addbadmovetobookfwcont}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?f"/>
+			|<button id="{addfen}" img="icons/add.png"/>
+			|<button id="{delfen}" img="icons/del.png"/>			
+			|<button id="{delallmoves}" img="icons/caution.png"/>			
+			|</hbox>
+			|
 			|<hbox bimage="wood.jpg" cover="false" padding="5">
 			|<button id="{pastepgnbutton}" img="icons/paste.png"/>
 			|<button id="{addmovetobook}" img="icons/add.png"/>			
@@ -419,26 +441,7 @@ object MyApp
 			|<button id="{addcurrentgame}" img="icons/board.png"/>
 			|<button id="{buildpgn}" img="icons/build.png"/>
 			|</hbox>
-			|<hbox id="boardcontrolpanelhbox" bimage="control.jpg" cover="false" gap="5" padding="5">						
-			|	<button id="{evalallmoves}" text="Eval all"/>
-			|	<button id="{evalsinglemove}" img="icons/build.png"/>
-			|	<combobox id="{evalalldepth}"/>
-			|	<button id="{boardcontrolpanelback}" img="icons/backt.png" style="round"/>
-			|	<button id="{boardcontrolpanelforward}" img="icons/forwardt.png" style="round"/>			
-			|	<button id="{boardcontrolpaneldel}" img="icons/delt.png" style="round"/>
-			|	<button id="{boardcontrolpanelstart}" img="icons/startt.png" style="round"/>
-			|	<button id="{boardcontrolpanelstop}" img="icons/stopt.png" style="round"/>
-			|	<button id="{boardcontrolpanelmake}" img="icons/maket.png" style="round"/>
-			|<button id="{addexclammovetobookfwcont}" style="-fx-background-color: #7fff7f; $bookbuttonstyle" text="!f"/>
-			|<button id="{addpromisingmovetobookfwcont}" style="-fx-background-color: #7f7fff; $bookbuttonstyle" text="!?f"/>
-			|<button id="{adddoubleexclammovetobookfwcont}" style="-fx-background-color: #00ff00; $bookbuttonstyle" text="!!f"/>			
-			|<button id="{addmatedmovetobookfwcont}" style="-fx-background-color: #ff0000; $bookbuttonstyle" text="??f"/>
-			|<button id="{addbadmovetobookfwcont}" style="-fx-background-color: #ff7f7f; $bookbuttonstyle" text="?f"/>
-			|<button id="{addfen}" img="icons/add.png"/>
-			|<button id="{delfen}" img="icons/del.png"/>
-			|<button id="{randomfen}" img="icons/angrybird.png"/>			
-			|<button id="{delallmoves}" img="icons/caution.png"/>			
-			|</hbox>
+			|
 			|<webview id="{bookwebview}"/>
 			|</vbox>
 			|</tab>
