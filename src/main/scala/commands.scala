@@ -265,7 +265,7 @@ object Commands extends Module
 		get_flip
 	}
 
-	def AddMoveToBook(annot:String=null,forward:Boolean=false,count:Int= -1,del:Boolean=false,addcomment:String=null):String=
+	def AddMoveToBook(annot:String=null,forward:Boolean=false,count:Int= -1,del:Boolean=false,addcomment:String=null,dosave:Boolean=true):String=
 	{
 		if(g.current_node!=g.root)
 		{
@@ -277,6 +277,8 @@ object Commands extends Module
 			if(del) g.delete else g.back
 
 			g.AnnotMove(san,annot,count,addcomment)
+
+			if(dosave) SaveGamePos
 
 			if(forward)
 			{
@@ -357,6 +359,19 @@ object Commands extends Module
 	{
 		Commands.g.build_book_pgn
 	}
+
+	def ColorMove(san:String,eval:Int,dosave:Boolean=true)
+	{
+		val uci=g.b.sanToMove(san).toAlgeb
+
+		AnnotateMove(san,"-",uci,dosave=dosave)
+		if(butils.IsMated(eval)) Commands.AnnotateMove(san,"??",uci,dosave=false)
+		else if(butils.IsMate(eval)) Commands.AnnotateMove(san,"!!",uci,dosave=false)
+		else if(butils.IsBad(eval)) Commands.AnnotateMove(san,"?",uci,dosave=false)
+		else if(butils.IsGood(eval)) Commands.AnnotateMove(san,"!",uci,dosave=false)
+		else if(butils.IsInteresting(eval)) Commands.AnnotateMove(san,"?!",uci,dosave=false)
+		else if(butils.IsPromising(eval)) Commands.AnnotateMove(san,"!?",uci,dosave=false)		
+	}	
 
 }
 

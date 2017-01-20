@@ -310,7 +310,7 @@ object Robot extends Module
 		false
 	}
 
-	def MakeAnEngineMove(fixedtime:Int= -1):Boolean=
+	def MakeAnEngineMove(fixedtime:Int= -1,undo:Boolean=false,addtobook:Boolean=false):Boolean=
 	{
 		val ei2=ExecutionItem(
 			client="Robot.LearnBoard",
@@ -340,7 +340,7 @@ object Robot extends Module
 					val ei3=ExecutionItem(
 						client="Robot.LearnBoard",
 						code=new Runnable{def run{
-						EngineManager.MakeAnalyzedMoveRunning
+						EngineManager.MakeAnalyzedMoveRunning(undo=undo,addtobook=addtobook)
 						}})
 					MyActor.queuedExecutor ! ei3
 				}
@@ -905,7 +905,7 @@ object Robot extends Module
 							val ei3=ExecutionItem(
 								client="Robot.LearnBoard",
 								code=new Runnable{def run{
-								EngineManager.MakeAnalyzedMoveRunning
+								EngineManager.MakeAnalyzedMoveRunning()
 								}})
 							MyActor.queuedExecutor ! ei3
 						}

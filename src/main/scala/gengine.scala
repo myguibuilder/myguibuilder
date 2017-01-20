@@ -58,7 +58,7 @@ case object WatchAnalysis
 case object StopWatchAnalysis
 
 case object MakeAnalyzedMoveMsg
-case object MakeAnalyzedMoveRunningMsg
+case class MakeAnalyzedMoveRunningMsg(undo:Boolean=false,addtobook:Boolean=false)
 
 object EngineManager extends Module
 {
@@ -112,9 +112,9 @@ object EngineManager extends Module
 		enginegames ! MakeAnalyzedMoveMsg
 	}
 
-	def MakeAnalyzedMoveRunning
+	def MakeAnalyzedMoveRunning(undo:Boolean=false,addtobook:Boolean=false)
 	{
-		enginegames ! MakeAnalyzedMoveRunningMsg
+		enginegames ! MakeAnalyzedMoveRunningMsg(undo=undo,addtobook=addtobook)
 	}
 
 	def Startup
@@ -1054,9 +1054,9 @@ case class EngineGames(
 		EngineManager.enginelist.MakeAnalyzedMove()
 	}
 
-	def make_analyzed_move_running
+	def make_analyzed_move_running(undo:Boolean=false,addtobook:Boolean=false)
 	{
-		EngineManager.enginelist.MakeAnalyzedMove(uselastbestmove=false,checkrestart=false)
+		EngineManager.enginelist.MakeAnalyzedMove(uselastbestmove=false,checkrestart=false,undo=undo,addtobook=addtobook)
 	}
 
 	def receive=
@@ -1081,9 +1081,9 @@ case class EngineGames(
 			make_analyzed_move
 		}
 
-		case MakeAnalyzedMoveRunningMsg =>
+		case mam:MakeAnalyzedMoveRunningMsg =>
 		{
-			make_analyzed_move_running
+			make_analyzed_move_running(undo=mam.undo,addtobook=mam.addtobook)
 		}
 
 		case StartGameMsg =>
@@ -3324,7 +3324,7 @@ case class GEngineList(var wid:String=null)
 		gb.highlight_engine_move(bestmove,score)
 	}
 
-	def MakeAnalyzedMove(uselastbestmove:Boolean=true,checkrestart:Boolean=true)
+	def MakeAnalyzedMove(uselastbestmove:Boolean=true,checkrestart:Boolean=true,undo:Boolean=false,addtobook:Boolean=false)
 	{
 		var bestmove:String=null
 		var scorenumerical:Int=0
@@ -3366,21 +3366,31 @@ case class GEngineList(var wid:String=null)
 		val ei=ExecutionItem(
 			client="GEngineList.MakeAnalyzedMove",
 			code=new Runnable{def run{
-			if((Commands.g.b.fullmove_number<= Settings.get_build_cutoff)&&(!uselastbestmove))
-			{
-				Commands.AnnotateMove(san,"!",bestmove,"E "+scorenumerical)
-			}
+
 			Commands.MakeSanMove(san)
+
+			if(addtobook)
+			{
+				Commands.AddMoveToBook(addcomment="E "+scorenumerical,dosave=false)
+				Commands.ColorMove(san,scorenumerical,dosave=false)
+				Commands.SaveGamePos
+				Commands.MakeSanMove(san)
+			}
+
+			if(undo) Commands.g.back
+
 			if(Builder.GB("{components}#{boardcontrolpanelclick}",false))
 			{
 				Robot.ClickMove(m)
 			}
+
 			MyApp.UpdateFunc(checkrestart=checkrestart)
 			if(checkrestart) CheckRestartAll(Commands.g) else
 			{				
 				EngineManager.StopAllEngines
 			}
 			EngineManager.move_made=true
+
 		}})
 		MyActor.queuedExecutor ! ei
 	}

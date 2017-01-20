@@ -559,7 +559,7 @@ object MyApp
 
 			if(ev.Id=="{boardcontrolpanelhint}")
 			{
-				Robot.MakeAnEngineMove(1000)
+				Hint
 			}
 
 			if(ev.Id=="{boardcontrolpaneloptions}")
@@ -1059,6 +1059,16 @@ object MyApp
 					|<hbox gap="5" padding="5">
 					|<label text="Max iterations"/>
 					|<slider id="{maxiterations}" value="3.0" width="450.0" height="50.0" min="0.0" max="10.0" majortickunit="1.0" minortickcount="0" showticklabels="true" showtickmarks="true"/>
+					|</hbox>
+					|<hbox gap="5" padding="5">
+					|<label text="Hint time"/>
+					|<slider id="{hinttime}" value="1000.0" width="450.0" height="50.0" min="0.0" max="10000.0" majortickunit="1000.0" minortickcount="1" showticklabels="true" showtickmarks="true"/>
+					|</hbox>
+					|<hbox gap="5" padding="5">
+					|<label text="Undo hint"/>
+					|<checkbox id="{undohint}"/>
+					|<label text="Don't add hint to book"/>
+					|<checkbox id="{dontaddhint}"/>
 					|</hbox>
 					|<hbox gap="5" padding="5">
 					|<label text="Color moves"/>
@@ -2186,6 +2196,12 @@ object MyApp
 
 	var maxiterations=3
 
+	var hinttime=1000
+
+	var undohint=false
+
+	var dontaddhint=false
+
 	var evalindex=0
 
 	var numeval=0
@@ -2215,7 +2231,7 @@ object MyApp
 		
 			Commands.AnnotateMove(san,"-",uci,"E "+score,dosave=false)
 
-			if(colormoveseval) ColorMove(san,score)
+			if(colormoveseval) Commands.ColorMove(san,score,dosave=false)
 
 			Commands.SaveGamePos
 
@@ -2290,7 +2306,7 @@ object MyApp
 		
 		Commands.AnnotateMove(san,"-",bestmove,"E "+score,dosave=false)
 
-		if(colormoveseval) ColorMove(san,score)
+		if(colormoveseval) Commands.ColorMove(san,score,dosave=false)
 
 		Commands.SaveGamePos
 
@@ -2463,8 +2479,6 @@ object MyApp
 
 					numberlimit=Builder.GD("{components}#{numberlimit}",3.0).toInt
 
-					maxiterations=Builder.GD("{components}#{maxiterations}",3.0).toInt
-
 					maxiterations=Builder.GD("{components}#{maxiterations}",3.0).toInt					
 
 					colormoveseval=GB("{components}#{colormoveseval}",false)
@@ -2608,19 +2622,6 @@ object MyApp
 
 		val s=MyStage("{minimaxdialog}","Minimax tool",blob,modal=true,unclosable=true,store=true,handler=minimax_handler)
 
-	}
-
-	def ColorMove(san:String,eval:Int)
-	{
-		val uci=Commands.g.b.sanToMove(san).toAlgeb
-
-		Commands.AnnotateMove(san,"-",uci,dosave=false)
-		if(butils.IsMated(eval)) Commands.AnnotateMove(san,"??",uci,dosave=false)
-		if(butils.IsMate(eval)) Commands.AnnotateMove(san,"!!",uci,dosave=false)
-		if(butils.IsBad(eval)) Commands.AnnotateMove(san,"?",uci,dosave=false)
-		if(butils.IsGood(eval)) Commands.AnnotateMove(san,"!",uci,dosave=false)
-		if(butils.IsInteresting(eval)) Commands.AnnotateMove(san,"?!",uci,dosave=false)
-		if(butils.IsPromising(eval)) Commands.AnnotateMove(san,"!?",uci,dosave=false)		
 	}	
 
 	def minimax_recursive(depth:Int,maxdepth:Int,line:List[String]):Int=
@@ -2715,7 +2716,7 @@ object MyApp
 
 			if((colormoves)&&(!solution))
 			{
-				ColorMove(san,eval)
+				Commands.ColorMove(san,eval,dosave=false)
 			}
 
 			Commands.SaveGamePos
@@ -2991,6 +2992,17 @@ object MyApp
 		val s=MyStage("{showdefaultbookdialog}","Default book",blob,modal=false,unclosable=false,store=true,handler=handler)
 
 		Update
+	}
+
+	def Hint
+	{
+		hinttime=Builder.GD("{components}#{hinttime}",1000.0).toInt
+
+		undohint=Builder.GB("{components}#{undohint}",false)
+
+		dontaddhint=Builder.GB("{components}#{dontaddhint}",false)
+
+		Robot.MakeAnEngineMove(hinttime,undo=undohint,addtobook=(!dontaddhint))
 	}
 
 }
